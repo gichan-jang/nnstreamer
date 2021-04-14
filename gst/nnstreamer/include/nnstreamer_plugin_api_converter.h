@@ -92,9 +92,9 @@ extern int registerExternalConverter (NNStreamerExternalConverter * ex);
 
 /**
  * @brief Converter's sub-plugin may call this to unregister itself.
- * @param[in] prefix The name of converter sub-plugin.
+ * @param[in] name The name of converter sub-plugin.
  */
-extern void unregisterExternalConverter (const char *prefix);
+extern void unregisterExternalConverter (const char *name);
 
 /**
  * @brief set custom property description for tensor converter sub-plugin
