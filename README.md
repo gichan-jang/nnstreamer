@@ -1,5 +1,5 @@
 # NNStreamer
-
+test taos CI server except android, yocto
 [![Gitter][gitter-image]][gitter-url] 
 [![Code Coverage](http://nnsuite.mooo.com/nnstreamer/ci/badge/codecoverage.svg)](http://nnsuite.mooo.com/nnstreamer/ci/gcov_html/index.html) 
 <a href="https://scan.coverity.com/projects/nnstreamer-nnstreamer">
