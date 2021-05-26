@@ -365,18 +365,24 @@ extern "C" {
 void
 init_converter_py (void)
 {
-  registerExternalConverter (&Python);
   /** Python should be initialized and finalized only once */
-  Py_Initialize ();
+  if (!Py_IsInitialized()) {
+    Py_Initialize ();
+  }
+  registerExternalConverter (&Python);
 }
 
 /** @brief Destruct this object for tensor converter sub-plugin */
 void
 fini_converter_py (void)
 {
-  /** Python should be initialized and finalized only once */
-  Py_Finalize ();
   unregisterExternalConverter (Python.name);
+  /** Python should be initialized and finalized only once */
+  if (Py_IsInitialized()) {
+    /** Wait external converter is unregistered */
+    g_usleep (100000);
+    Py_Finalize ();
+  }
 }
 #ifdef __cplusplus
 }
