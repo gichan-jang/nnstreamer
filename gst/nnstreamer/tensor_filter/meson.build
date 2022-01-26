@@ -14,5 +14,6 @@ if get_option('enable-filter-cpp-class')
 endif
 
 # filter single-shot
-nnstreamer_sources += join_paths(meson.current_source_dir(), 'tensor_filter_single.c')
+nnstreamer_single_sources += join_paths(meson.current_source_dir(), 'tensor_filter_single.c')
+nnstreamer_single_sources += join_paths(meson.current_source_dir(), 'tensor_filter_common.c')
 nnstreamer_headers += join_paths(meson.current_source_dir(), 'tensor_filter_single.h')
