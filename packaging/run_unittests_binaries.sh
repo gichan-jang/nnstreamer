@@ -68,7 +68,7 @@ run_entry() {
     popd
   fi
 
-  ${entry} --gtest_output="xml:${entry##*/}.xml"
+  ${entry} --gtest_output="xml:${entry##*/}.xml" --gtest_repeat=100
   retval=$?
   export PYTHONPATH=${_PYTHONPATH}
 
