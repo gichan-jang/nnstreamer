@@ -73,7 +73,9 @@ NNSTREAMER_PLUGINS_SRCS := \
     $(NNSTREAMER_GST_HOME)/tensor_query/tensor_query_client.c \
     $(NNSTREAMER_GST_HOME)/tensor_query/tensor_query_serversink.c \
     $(NNSTREAMER_GST_HOME)/tensor_query/tensor_query_serversrc.c \
-    $(NNSTREAMER_GST_HOME)/tensor_query/tensor_query_server.c
+    $(NNSTREAMER_GST_HOME)/tensor_query/tensor_query_server.c \
+    $(NNSTREAMER_GST_HOME)/tensor_query/nnstreamer_edge_common.c \
+    $(NNSTREAMER_GST_HOME)/tensor_query/nnstreamer_edge_internal.c
 
 # source AMC (Android MediaCodec)
 NNSTREAMER_SOURCE_AMC_SRCS := \

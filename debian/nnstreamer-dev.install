@@ -9,6 +9,7 @@
 /usr/include/nnstreamer/tensor_decoder_custom.h
 /usr/include/nnstreamer/tensor_filter_cpp.hh
 /usr/include/nnstreamer/nnstreamer_cppplugin_api_filter.hh
+/usr/include/nnstreamer/nnstreamer-edge.h
 /usr/lib/*/pkgconfig/nnstreamer.pc
 /usr/lib/*/pkgconfig/nnstreamer-cpp.pc
 /usr/lib/*/libnnstreamer.a

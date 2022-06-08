@@ -1095,6 +1095,7 @@ cp -r result %{buildroot}%{_datadir}/nnstreamer/unittest/
 %{_includedir}/nnstreamer/nnstreamer_util.h
 %{_includedir}/nnstreamer/tensor_filter_cpp.hh
 %{_includedir}/nnstreamer/nnstreamer_cppplugin_api_filter.hh
+%{_includedir}/nnstreamer/nnstreamer-edge.h
 %{_libdir}/pkgconfig/nnstreamer.pc
 %{_libdir}/pkgconfig/nnstreamer-cpp.pc
 
