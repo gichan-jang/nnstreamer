@@ -16,6 +16,7 @@
 
 #include <string.h>
 #include "tensor_query_serversink.h"
+#include "nnstreamer_util.h"
 
 GST_DEBUG_CATEGORY_STATIC (gst_tensor_query_serversink_debug);
 #define GST_CAT_DEFAULT gst_tensor_query_serversink_debug
@@ -279,7 +280,8 @@ gst_tensor_query_serversink_render (GstBaseSink * bsink, GstBuffer * buf)
         num_mems = i;
         goto done;
       }
-      nns_edge_data_add (data_h, map[i].data, map[i].size, NULL);
+      nns_edge_data_add (data_h, _g_memdup (map[i].data, map[i].size),
+          map[i].size, g_free);
     }
 
     val = g_strdup_printf ("%ld", (long int) meta_query->client_id);

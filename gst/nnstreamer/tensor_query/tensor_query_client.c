@@ -171,6 +171,9 @@ _get_ip_address (void)
   freeifaddrs (addrs);
 
 done:
+  if (NULL == ret)
+    ret = g_strdup ("localhost");
+
   return ret;
 }
 
@@ -216,7 +219,7 @@ static void
 gst_tensor_query_client_finalize (GObject * object)
 {
   GstTensorQueryClient *self = GST_TENSOR_QUERY_CLIENT (object);
-  nns_edge_data_h data_h;
+  nns_edge_data_h *data_h;
 
   g_free (self->host);
   self->host = NULL;
@@ -228,7 +231,8 @@ gst_tensor_query_client_finalize (GObject * object)
   self->in_caps_str = NULL;
 
   while ((data_h = g_async_queue_try_pop (self->msg_queue))) {
-    nns_edge_data_destroy (data_h);
+    nns_edge_data_destroy (*data_h);
+    g_free (data_h);
   }
   g_async_queue_unref (self->msg_queue);
 
@@ -493,9 +497,9 @@ _nns_edge_event_cb (nns_edge_event_h event_h, void *user_data)
     }
     case NNS_EDGE_EVENT_NEW_DATA_RECEIVED:
     {
-      nns_edge_data_h data;
+      nns_edge_data_h *data = g_new0 (nns_edge_data_h, 1);
 
-      nns_edge_event_parse_new_data (event_h, &data);
+      nns_edge_event_parse_new_data (event_h, data);
       g_async_queue_push (self->msg_queue, data);
       break;
     }
@@ -564,6 +568,7 @@ gst_tensor_query_client_sink_event (GstPad * pad,
       nns_edge_set_info (self->edge_h, "IP", ip);
       nns_edge_set_info (self->edge_h, "PORT", "0");
       g_free (ip);
+
       if (0 != nns_edge_start (self->edge_h, false)) {
         nns_loge
             ("Failed to start NNStreamer-edge. Please check server IP and port");
@@ -647,14 +652,14 @@ gst_tensor_query_client_chain (GstPad * pad,
   GstTensorQueryClient *self = GST_TENSOR_QUERY_CLIENT (parent);
   GstBuffer *out_buf = NULL;
   GstFlowReturn res = GST_FLOW_OK;
-  nns_edge_data_h data_h = NULL;
+  nns_edge_data_h *data_h = g_new0 (nns_edge_data_h, 1);
   guint i, num_mems, num_data;
   int ret;
   GstMemory *mem[NNS_TENSOR_SIZE_LIMIT];
   GstMapInfo map[NNS_TENSOR_SIZE_LIMIT];
   UNUSED (pad);
 
-  ret = nns_edge_data_create (&data_h);
+  ret = nns_edge_data_create (data_h);
   if (ret != NNS_EDGE_ERROR_NONE) {
     nns_loge ("Failed to create data handle in client chain.");
     return GST_FLOW_ERROR;
@@ -668,20 +673,21 @@ gst_tensor_query_client_chain (GstPad * pad,
       num_mems = i;
       goto done;
     }
-    nns_edge_data_add (data_h, map[i].data, map[i].size, NULL);
+    nns_edge_data_add (*data_h, map[i].data, map[i].size, NULL);
   }
-  if (0 != nns_edge_request (self->edge_h, data_h, self)) {
+  if (0 != nns_edge_request (self->edge_h, *data_h)) {
     nns_logw ("Failed to request to server node, retry connection.");
     goto retry;
   }
 
-  nns_edge_data_destroy (data_h);
+  nns_edge_data_destroy (*data_h);
+  g_free (data_h);
   data_h = NULL;
 
   data_h = g_async_queue_try_pop (self->msg_queue);
   if (data_h) {
     out_buf = gst_buffer_new ();
-    if (NNS_EDGE_ERROR_NONE != nns_edge_data_get_count (data_h, &num_data)) {
+    if (NNS_EDGE_ERROR_NONE != nns_edge_data_get_count (*data_h, &num_data)) {
       nns_loge ("Failed to get the number of memories of the edge data.");
       res = GST_FLOW_ERROR;
       goto done;
@@ -691,7 +697,7 @@ gst_tensor_query_client_chain (GstPad * pad,
       size_t data_len;
       gpointer new_data;
 
-      nns_edge_data_get (data_h, i, &data, &data_len);
+      nns_edge_data_get (*data_h, i, &data, &data_len);
       new_data = _g_memdup (data, data_len);
       gst_buffer_append_memory (out_buf,
           gst_memory_new_wrapped (0, new_data, data_len, 0,
@@ -712,7 +718,11 @@ retry:
     res = GST_FLOW_ERROR;
   }
 done:
-  nns_edge_data_destroy (data_h);
+  if (data_h) {
+    nns_edge_data_destroy (*data_h);
+    g_free (data_h);
+  }
+
   for (i = 0; i < num_mems; i++)
     gst_memory_unmap (mem[i], &map[i]);
 

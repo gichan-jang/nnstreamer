@@ -162,7 +162,7 @@ static void
 gst_tensor_query_serversrc_finalize (GObject * object)
 {
   GstTensorQueryServerSrc *src = GST_TENSOR_QUERY_SERVERSRC (object);
-  nns_edge_data_h data_h;
+  nns_edge_data_h *data_h;
 
   g_free (src->host);
   src->host = NULL;
@@ -172,7 +172,8 @@ gst_tensor_query_serversrc_finalize (GObject * object)
   src->srv_host = NULL;
 
   while ((data_h = g_async_queue_try_pop (src->msg_queue))) {
-    nns_edge_data_destroy (data_h);
+    nns_edge_data_destroy (*data_h);
+    g_free (data_h);
   }
   g_async_queue_unref (src->msg_queue);
 
@@ -283,9 +284,9 @@ _nns_edge_event_cb (nns_edge_event_h event_h, void *user_data)
   switch (event_type) {
     case NNS_EDGE_EVENT_NEW_DATA_RECEIVED:
     {
-      nns_edge_data_h data;
+      nns_edge_data_h *data = g_new0 (nns_edge_data_h, 1);
 
-      nns_edge_event_parse_new_data (event_h, &data);
+      nns_edge_event_parse_new_data (event_h, data);
       g_async_queue_push (src->msg_queue, data);
       break;
     }
@@ -356,7 +357,7 @@ gst_tensor_query_serversrc_start (GstBaseSrc * bsrc)
 static GstBuffer *
 _gst_tensor_query_serversrc_get_buffer (GstTensorQueryServerSrc * src)
 {
-  nns_edge_data_h data_h = NULL;
+  nns_edge_data_h *data_h = NULL;
   GstBuffer *buffer = NULL;
   guint i, num_data;
   GstMetaQuery *meta_query;
@@ -369,7 +370,7 @@ _gst_tensor_query_serversrc_get_buffer (GstTensorQueryServerSrc * src)
   }
   buffer = gst_buffer_new ();
 
-  if (NNS_EDGE_ERROR_NONE != nns_edge_data_get_count (data_h, &num_data)) {
+  if (NNS_EDGE_ERROR_NONE != nns_edge_data_get_count (*data_h, &num_data)) {
     nns_loge ("Failed to get the number of memories of the edge data.");
     gst_buffer_unref (buffer);
     return NULL;
@@ -379,7 +380,7 @@ _gst_tensor_query_serversrc_get_buffer (GstTensorQueryServerSrc * src)
     size_t data_len = 0;
     gpointer new_data;
 
-    nns_edge_data_get (data_h, i, &data, &data_len);
+    nns_edge_data_get (*data_h, i, &data, &data_len);
     new_data = _g_memdup (data, data_len);
 
     gst_buffer_append_memory (buffer,
@@ -393,7 +394,7 @@ _gst_tensor_query_serversrc_get_buffer (GstTensorQueryServerSrc * src)
       char *val;
       int ret;
 
-      ret = nns_edge_data_get_info (data_h, "client_id", &val);
+      ret = nns_edge_data_get_info (*data_h, "client_id", &val);
       if (NNS_EDGE_ERROR_NONE != ret) {
         gst_buffer_unref (buffer);
         buffer = NULL;
@@ -403,7 +404,8 @@ _gst_tensor_query_serversrc_get_buffer (GstTensorQueryServerSrc * src)
       }
     }
   }
-  nns_edge_data_destroy (data_h);
+  nns_edge_data_destroy (*data_h);
+  g_free (data_h);
 
   return buffer;
 }

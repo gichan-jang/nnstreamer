@@ -1,0 +1,6 @@
+==530022== Memcheck, a memory error detector
+==530022== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==530022== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
+==530022== Command: ./runTest.sh
+==530022== Parent PID: 3109
+==530022== 
