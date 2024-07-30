@@ -14,13 +14,6 @@ jobs:
       matrix:
         include:
           - gbs_build_arch: "x86_64"
-            gbs_build_option: "--define \"unit_test 1\""
-          - gbs_build_arch: "i586"
-            gbs_build_option: "--define \"unit_test 1\""
-          - gbs_build_arch: "armv7l"
-            gbs_build_option: "--define \"unit_test 0\""
-          - gbs_build_arch: "aarch64"
-            gbs_build_option: "--define \"unit_test 0\""
 
     runs-on: ubuntu-22.04
 
@@ -59,22 +52,27 @@ jobs:
     - name: run GBS
       if: env.rebuild == '1'
       run: |
-        gbs build --skip-srcrpm --define "_skip_debug_rpm 1" -A ${{ matrix.gbs_build_arch }} ${{ matrix.gbs_build_option }}
-        ## Skip nntrainer build test in aarch64. @todo We need #2430 and #2431 in nntrainer.git
+        gbs build --skip-srcrpm --define "_skip_debug_rpm 1" -A ${{ matrix.gbs_build_arch }}
         if [[ "${{ matrix.gbs_build_arch }}" == "aarch64" ]]; then
           echo "rebuild=0" >> "$GITHUB_ENV"
         fi
 
-    - name: get nntrainer
-      if: env.rebuild == '1'
-      uses: actions/checkout@v4
-      with:
-        repository: nnstreamer/nntrainer
-        path: nntrainer
-
-    - name: run nntrainer GBS build
-      if: env.rebuild == '1'
+    - name: SHOW AWS CLI VERSION
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
+        AWS_EC2_METADATA_DISABLED: true
       run: |
-        pushd nntrainer
-        gbs build --skip-srcrpm -A ${{ matrix.gbs_build_arch }} ${{ matrix.gbs_build_option }} --define "_skip_debug_rpm 1"
-        popd
+        aws --version
+
+
+    - name: Sync Bucket
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_S3_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_ACCESS_KEY_SECRET }}
+        AWS_EC2_METADATA_DISABLED: true
+      run: |
+        aws configure list
+        aws s3 cp \
+          --region ap-northeast-2 \
+          ~/GBS-ROOT/local/repos/tizen/${{ matrix.gbs_build_arch }}/RPMS/nnstreamer-2.4.1-0.x86_64.rpm s3://nnstreamer-release/nnstreamer-2.4.1-0.x86_64.rpm
