@@ -1653,6 +1653,11 @@ _gtfc_setprop_ACCELERATOR (GstTensorFilterPrivate * priv,
   gint status = 0;
   const gchar *accelerators = g_value_get_string (value);
 
+  if (!accelerators) {
+    ml_loge ("Failed to get accelerators string.");
+    return -1;
+  }
+
   if (priv->prop.fw_opened == TRUE) {
     if (GST_TF_FW_V0 (priv->fw)) {
       ml_loge
