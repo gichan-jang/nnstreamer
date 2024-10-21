@@ -1215,6 +1215,7 @@ gst_tensor_trainer_set_prop_framework (GstTensorTrainer * trainer,
     const GValue * value)
 {
   g_free (trainer->fw_name);
+  trainer->fw_name = NULL;
   trainer->fw_name = g_value_dup_string (value);
   GST_INFO_OBJECT (trainer, "Framework: %s", trainer->fw_name);
 
@@ -1229,6 +1230,7 @@ gst_tensor_trainer_set_prop_model_config_file_path (GstTensorTrainer *
     trainer, const GValue * value)
 {
   g_free ((char *) trainer->prop.model_config);
+  trainer->prop.model_config = NULL;
   trainer->prop.model_config = g_value_dup_string (value);
   GST_INFO_OBJECT (trainer, "Model configuration file path: %s",
       trainer->prop.model_config);
@@ -1242,6 +1244,7 @@ gst_tensor_trainer_set_model_save_path (GstTensorTrainer * trainer,
     const GValue * value)
 {
   g_free ((char *) trainer->prop.model_save_path);
+  trainer->prop.model_save_path = NULL;
   trainer->prop.model_save_path = g_value_dup_string (value);
   GST_INFO_OBJECT (trainer, "File path to save the model: %s",
       trainer->prop.model_save_path);
@@ -1255,6 +1258,7 @@ gst_tensor_trainer_set_model_load_path (GstTensorTrainer * trainer,
     const GValue * value)
 {
   g_free ((char *) trainer->prop.model_load_path);
+  trainer->prop.model_load_path = NULL;
   trainer->prop.model_load_path = g_value_dup_string (value);
   GST_INFO_OBJECT (trainer, "File path to load the model: %s",
       trainer->prop.model_load_path);
