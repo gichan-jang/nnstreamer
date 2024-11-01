@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: [ main ]
 
+  workflow_dispatch:
+
+
 jobs:
   build:
     name: Tizen GBS build on Ubuntu
@@ -14,7 +17,7 @@ jobs:
       matrix:
         include:
           - gbs_build_arch: "x86_64"
-            gbs_build_option: "--define \"unit_test 1\""
+            gbs_build_option: "--define \"unit_test 1\" --define \"testcoverage 1\""
           - gbs_build_arch: "i586"
             gbs_build_option: "--define \"unit_test 1\""
           - gbs_build_arch: "armv7l"
@@ -60,3 +63,10 @@ jobs:
       if: env.rebuild == '1'
       run: |
         gbs build --skip-srcrpm --define "_skip_debug_rpm 1" -A ${{ matrix.gbs_build_arch }} ${{ matrix.gbs_build_option }}
+
+    - name: extract test coverage result
+      run: |
+        mkdir -p ~/testresult/
+        pushd ~/testresult/
+        cp ~/GBS-ROOT/local/repos/tizen/x86_64/RPMS/nnstreamer/*-coverage*.rpm .
+        rpm2cpio *-coverage*.rpm | cpio -idv
