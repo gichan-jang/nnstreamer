@@ -41,7 +41,7 @@ typedef struct
   uint32_t magic;
   uint32_t version;
   uint32_t num_extra_tensors;
-  uint64_t reserved;
+  uint64_t reservedd;
   GstTensorInfo infos[NNS_TENSOR_SIZE_EXTRA_LIMIT];
 } GstTensorExtraInfo;
 

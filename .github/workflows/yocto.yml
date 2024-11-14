@@ -48,7 +48,7 @@ jobs:
         key: yocto-cache-yocto-5.0.3
 
     - name: acquire some disk space
-      if: steps.rebuild.outputs.rebuild == '1'
+      if: false # Enable this step when you need to make new cache.
       run: |
           df -h
           sudo apt-get update --fix-missing \
@@ -64,7 +64,6 @@ jobs:
     - name: build
       if: steps.rebuild.outputs.rebuild == '1'
       id: yocto-build
-      continue-on-error: true
       run: |
         echo "::group::apt-get install"
         sudo apt-get update
@@ -76,7 +75,14 @@ jobs:
         echo "::group::Prepare poky and meta-neural-network"
         git clone git://git.yoctoproject.org/poky -b yocto-5.0.3 && cd poky
         git clone https://github.com/nnstreamer/meta-neural-network -b scarthgap
+        # WORKDIR="${{ github.workspace }}"
+        # echo 'SRC_URI = "git://${{ github.workspace }}/;protocol=file;usehead=1;nobranch=1"' >> meta-neural-network/recipes-nnstreamer/nnstreamer/nnstreamer_2.4.2.bbappend
+        # echo 'S = "${WORKDIR}/git"' >> meta-neural-network/recipes-nnstreamer/nnstreamer/nnstreamer_2.4.2.bbappend
+        # cat meta-neural-network/recipes-nnstreamer/nnstreamer/nnstreamer_2.4.2.bbappend
         echo 'SRC_URI = "git://${{ github.workspace }}/;protocol=file;usehead=1;nobranch=1"' >> meta-neural-network/recipes-nnstreamer/nnstreamer/nnstreamer_%.bbappend
+        echo 'S = "${WORKDIR}/git"' >> meta-neural-network/recipes-nnstreamer/nnstreamer/nnstreamer_%.bbappend
+        cat meta-neural-network/recipes-nnstreamer/nnstreamer/nnstreamer_%.bbappend
+        ls -al meta-neural-network/recipes-nnstreamer/nnstreamer/
         source oe-init-build-env
         bitbake-layers add-layer ../meta-neural-network
         echo "::endgroup::"
