@@ -2503,7 +2503,7 @@ nnstreamer_converter_custom_unregister (const gchar * name)
 
   ptr = (converter_custom_cb_s *) get_subplugin (NNS_CUSTOM_CONVERTER, name);
   if (!unregister_subplugin (NNS_CUSTOM_CONVERTER, name)) {
-    ml_loge ("tensor_converter: Failed to unregister custom callback %s.",
+    ml_logeFAIL ("tensor_converter: Failed to unregister custom callback %s.",
         name);
     return -EINVAL;
   }

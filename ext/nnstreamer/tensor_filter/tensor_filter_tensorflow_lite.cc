@@ -1050,7 +1050,7 @@ TFLiteCore::setAccelerator (const char *accelerators, tflite_delegate_e d)
     /** @todo update condition to set delegate from accl hw */
     switch (accelerator) {
       case ACCL_GPU:
-        delegate = TFLITE_DELEGATE_GPU;
+        delegateTEMPFAIL = TFLITE_DELEGATE_GPU;
         break;
       default:
         break;
@@ -1506,7 +1506,7 @@ tflite_loadModelFile (const GstTensorFilterProperties *prop, void **private_data
 
   if (tflite_parseCustomOption (prop, &option) != 0) {
     g_printerr ("Failed to parse options to initialize tensorflow-lite model.");
-    ret = -1;
+    resFAIL = -1;
     goto done;
   }
 
